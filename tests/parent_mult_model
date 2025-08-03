@@ -1,0 +1,77 @@
+import pandas as pd
+
+def generate_cifa_index(input_csv, output_csv):
+    """
+    Reads a CSV file, processes CIFA parent-child relationships,
+    generates the correct index, and saves to a new CSV file.
+    
+    Args:
+        input_csv (str): Path to the input CSV file.
+        output_csv (str): Path to save the output CSV file.
+    """
+    print("Loading CSV file...")
+    # Load the CSV file, ensuring CIFAs are treated as strings
+    df = pd.read_csv(input_csv, dtype=str)
+    print("CSV file loaded.")
+
+    # Check for CIFAs that are also present in parent_cifa
+    cifa_set = set(df["CIFA"].dropna())
+    parent_cifa_set = set(df["parent_cifa"].dropna())
+    common_cifas = cifa_set.intersection(parent_cifa_set)
+    if common_cifas:
+        raise ValueError(f"CIFAs {', '.join(common_cifas)} are both children and parents")
+
+    # Create mappings for parent-child relationships and model numbers
+    parent_map = df.set_index("CIFA")["parent_cifa"].to_dict()
+    model_map = df.set_index("CIFA")["Model"].to_dict()
+    parent_model_map = df.set_index("parent_cifa")["parent_model"].to_dict()
+    print("Mappings created.")
+
+    # Dictionary to store the final index values
+    parent_to_models = {}
+
+    # Function to find the highest parent CIFA
+    def get_highest_parent(cifa):
+        while cifa in parent_map and pd.notna(parent_map[cifa]) and parent_map[cifa] != "":
+            cifa = parent_map[cifa]
+        return cifa
+
+    # Collect all models for each highest parent CIFA
+    for cifa in df["CIFA"].dropna():
+        highest_parent = get_highest_parent(cifa)
+        print(f"Processing CIFA: {cifa}, Highest Parent: {highest_parent}")
+
+        # Initialize the set for storing unique models under this parent
+        if highest_parent not in parent_to_models:
+            parent_to_models[highest_parent] = set()
+
+        # Add parent model(s) if they exist, converting arrays to sets
+        parent_models = set(df[df["parent_cifa"] == highest_parent]["parent_model"].dropna().tolist())
+        parent_to_models[highest_parent].update(parent_models)
+        print(f"Parent models for {highest_parent}: {parent_models}")
+
+        # Add models from the children and the parent itself, converting arrays to sets
+        related_models = set(df[(df["parent_cifa"] == highest_parent) | (df["CIFA"] == highest_parent)]["Model"].dropna().tolist())
+        parent_to_models[highest_parent].update(related_models)
+        print(f"Related models for {highest_parent}: {related_models}")
+
+    # Generate final indexes
+    parent_to_index = {
+        parent: f"{parent}." + "_".join(sorted(models))
+        for parent, models in parent_to_models.items()
+    }
+    print("Final indexes generated.")
+
+    # Apply the generated index to each row
+    df["Generated_Index"] = df["CIFA"].apply(lambda x: parent_to_index.get(get_highest_parent(x), ""))
+    print("Indexes applied to DataFrame.")
+
+    # Save the updated DataFrame to a new CSV file
+    df.to_csv(output_csv, index=False)
+    print(f"Processed data saved to {output_csv}")
+
+# Example usage
+input_file = r"C:\Users\jfeaga619\Desktop\test.csv"  # Replace with your input file path
+output_file = r"C:\Users\jfeaga619\Desktop\output_with_index.csv"  # Replace with desired output file name
+
+generate_cifa_index(input_file, output_file)

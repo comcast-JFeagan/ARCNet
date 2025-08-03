@@ -1,0 +1,14 @@
+README.md
+setup.py
+src/cifa_cleaning/__init__.py
+src/cifa_cleaning/clean.py
+src/cifa_cleaning/ingest.py
+src/cifa_cleaning/matching.py
+src/cifa_cleaning/merge.py
+src/cifa_cleaning/parallel.py
+src/cifa_cleaning.egg-info/PKG-INFO
+src/cifa_cleaning.egg-info/SOURCES.txt
+src/cifa_cleaning.egg-info/dependency_links.txt
+src/cifa_cleaning.egg-info/requires.txt
+src/cifa_cleaning.egg-info/top_level.txt
+tests/test_ingest.py

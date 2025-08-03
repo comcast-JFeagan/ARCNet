@@ -1,0 +1,14 @@
+{
+    "python.pythonPath": "venv\\Scripts\\python.exe",
+    "python.linting.pylintEnabled": true,
+    "python.linting.enabled": true,
+    "python.linting.pylintPath": "venv\\Scripts\\pylint.exe",
+    "python.linting.pylintArgs": [
+        "--load-plugins=pylint_django"
+    ],
+    "python.linting.pylintUseMinimalCheckers": false,
+    "python.analysis.extraPaths": [
+        "${workspaceFolder}"
+    ],
+    "git.ignoreLimitWarning": true
+}
