@@ -135,13 +135,11 @@ def normalize_report(df_raw, config):
 
     return processed, df_ignored, df_raw_full
 
-def save_to_excel(processed, ignored, raw, original_file_path):
+def save_to_excel(processed, ignored, raw, original_file_path, output_folder=None):
     base_name = os.path.splitext(os.path.basename(original_file_path))[0]
-    output_dir = os.path.join(os.path.dirname(__file__), "Output")
+    output_dir = output_folder or os.path.join(os.path.dirname(__file__), "Output")
     os.makedirs(output_dir, exist_ok=True)
-    #output_path = os.path.join(output_dir, f"{base_name}_processed.xlsx")
-    output_path = os.path.join(f"/Users/jeremyfeagan/arcnet_outputs", f"{base_name}_processed.xlsx")
-   
+    output_path = os.path.join(output_dir, f"{base_name}_processed.xlsx")
 
     with pd.ExcelWriter(output_path, engine="xlsxwriter") as writer:
         for df, sheet_name in [(processed, "Processed"), (ignored, "Ignored"), (raw, "Raw")]:
@@ -154,9 +152,12 @@ def save_to_excel(processed, ignored, raw, original_file_path):
 
     return output_path
 
-def normalize_single_report(df_raw, data_path, config_path):
-    config = load_config(config_path)
+def normalize_single_report(df_raw, data_path, config_or_path, output_folder=None):
+    if isinstance(config_or_path, str):
+        config = load_config(config_or_path)
+    else:
+        config = config_or_path
     processed, ignored, raw = normalize_report(df_raw, config)
-    output_path = save_to_excel(processed, ignored, raw, data_path)
+    output_path = save_to_excel(processed, ignored, raw, data_path, output_folder=output_folder)
     logging.info(f"✅ Excel file saved to: {output_path}")
     return output_path
