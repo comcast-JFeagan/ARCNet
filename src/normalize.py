@@ -139,7 +139,9 @@ def save_to_excel(processed, ignored, raw, original_file_path):
     base_name = os.path.splitext(os.path.basename(original_file_path))[0]
     output_dir = os.path.join(os.path.dirname(__file__), "Output")
     os.makedirs(output_dir, exist_ok=True)
-    output_path = os.path.join(output_dir, f"{base_name}_processed.xlsx")
+    #output_path = os.path.join(output_dir, f"{base_name}_processed.xlsx")
+    output_path = os.path.join(f"/Users/jeremyfeagan/arcnet_outputs", f"{base_name}_processed.xlsx")
+   
 
     with pd.ExcelWriter(output_path, engine="xlsxwriter") as writer:
         for df, sheet_name in [(processed, "Processed"), (ignored, "Ignored"), (raw, "Raw")]:
