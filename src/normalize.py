@@ -7,6 +7,7 @@ import re
 import pandas as pd
 import unicodedata
 import logging
+import platform
 
 # Configure logging
 logging.basicConfig(level=logging.INFO, format="%(levelname)s: %(message)s")
@@ -26,6 +27,15 @@ def load_config(config_path):
     df = pd.read_excel(config_path)
     df.columns = [clean_column_name(col) for col in df.columns.str.strip()]
     return df
+
+def get_default_output_folder():
+    system = platform.system()
+    if system == "Darwin":  # macOS
+        return "/Users/jeremyfeagan/arcnet_outputs"
+    elif system == "Windows":
+        return os.path.join(os.environ["USERPROFILE"], "Documents", "ARCNetOutputs")
+    else:
+        return os.path.join(os.path.dirname(__file__), "Output")
 
 # Rule functions
 def rule_text(series):
@@ -137,8 +147,15 @@ def normalize_report(df_raw, config):
 
 def save_to_excel(processed, ignored, raw, original_file_path, output_folder=None):
     base_name = os.path.splitext(os.path.basename(original_file_path))[0]
-    output_dir = output_folder or os.path.join(os.path.dirname(__file__), "Output")
-    os.makedirs(output_dir, exist_ok=True)
+    #output_dir = output_folder or os.path.join(os.path.dirname(__file__), "Output")
+    output_dir = output_folder or get_default_output_folder()
+    if not os.path.exists(output_dir):
+        os.makedirs(output_dir, exist_ok=True)
+        logging.info(f"Creating output directory: {output_dir}")
+    else:
+        logging.info(f"Using existing output directory: {output_dir}")
+    if not os.path.isdir(output_dir):
+        raise NotADirectoryError(f"Output path is not a directory: {output_dir}")
     output_path = os.path.join(output_dir, f"{base_name}_processed.xlsx")
 
     with pd.ExcelWriter(output_path, engine="xlsxwriter") as writer:
