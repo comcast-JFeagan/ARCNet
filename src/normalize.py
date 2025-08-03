@@ -125,7 +125,7 @@ def normalize_report(df_raw, config):
             series = df_raw[col]
 
             if rule in RULE_DISPATCH:
-                processed[std_col] = series
+                processed[std_col] = RULE_DISPATCH[rule](series)
                 if rule == "pad9":
                     item_padded = processed[std_col]
             elif rule == "modelno":
