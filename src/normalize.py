@@ -128,13 +128,13 @@ def normalize_report(df_raw, config):
                 processed[std_col] =RULE_DISPATCH[rule](series)
                 if rule == "pad9":
                     item_padded = processed[std_col]
-            elif rule == "modelno":
-                processed[std_col] = series
-                model_clean = clean_modelno(series)
-                processed[f"{std_col}_Clean"] = model_clean
-            elif rule == "mfgname":
-                processed[std_col] = series
-                processed[f"{std_col}_Clean"] = clean_mfgname(series)
+                elif rule == "modelno":
+                    processed[std_col] = series
+                    model_clean = clean_modelno(series)
+                    processed[f"{std_col}_Clean"] = model_clean
+                elif rule == "mfgname":
+                    processed[std_col] = series
+                    processed[f"{std_col}_Clean"] = clean_mfgname(series)
 
     if model_clean is not None and item_padded is not None:
         processed.insert(0, "INDEX", model_clean + "\n" + item_padded)
