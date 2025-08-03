@@ -1,35 +1,36 @@
-from src.normalize import normalize_single_report
-import pandas as pd
 import os
+import logging
+import pandas as pd
+from src.normalize import normalize_single_report
 
-def get_input_data() -> tuple[pd.DataFrame, str]:
+# Configure logging
+logging.basicConfig(level=logging.INFO, format="%(levelname)s: %(message)s")
+
+def get_input_data():
     while True:
         file_path = input("📂 Enter the full path to the report file (.csv or .xlsx): ").strip()
 
         if not os.path.isfile(file_path):
-            print(f"❌ File not found: {file_path}")
+            logging.error(f"File not found: {file_path}")
             continue
 
         ext = os.path.splitext(file_path)[1].lower()
-
         try:
             if ext == ".csv":
                 df = pd.read_csv(file_path)
             elif ext in [".xlsx", ".xls"]:
                 df = pd.read_excel(file_path)
             else:
-                print("⚠️ Unsupported file type. Please use .csv or .xlsx.")
+                logging.warning("⚠️ Unsupported file type. Please use .csv or .xlsx.")
                 continue
-            print(f"✅ Successfully loaded: {file_path}")
+
+            logging.info(f"✅ Successfully loaded: {file_path}")
             return df, file_path
         except Exception as e:
-            print(f"❌ Error reading file: {e}")
+            logging.error(f"❌ Error reading file: {e}")
 
 if __name__ == "__main__":
     df_raw, input_path = get_input_data()
-    output = normalize_single_report(
-        df_raw,
-        input_path,
-        config_path=r"config/Report Normal.xlsx"
-    )
-    print(f"📄 Saved processed file to: {output}")
+    config_path = r"config/Report_Config.xlsx"
+    output = normalize_single_report(df_raw, input_path, config_path)
+    logging.info(f"📄 Saved processed file to: {output}")
